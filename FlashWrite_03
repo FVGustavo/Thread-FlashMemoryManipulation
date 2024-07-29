@@ -38,11 +38,12 @@ void read_nvs_value(void)
   err = nvs_open("storage", NVS_READWRITE, &my_handle);
   if (err != ESP_OK)
   {
-    printf("Erro ao abrir o handle \n");
+    printf("Erro ao abrir a flash \n");
     return;
   }
 
   err = nvs_get_i32(my_handle, "th_read_num_1", &stored_value);
+
   if (err == ESP_ERR_NVS_NOT_FOUND)
   {
     printf("O valor ainda não foi inicializado \n");
@@ -57,6 +58,7 @@ void read_nvs_value(void)
   }
 
   nvs_close(my_handle);
+  vTaskDelay(pdMS_TO_TICKS(1000));
 }
 
 void taskGenNum1(void)
@@ -92,6 +94,7 @@ void taskReadNum1(void *pvParameter)
     xQueueReceive(queue_1, &received_num_1, portMAX_DELAY);
 
     err = nvs_open("storage", NVS_READWRITE, &nvs_handle_1);
+
     if (err != ESP_OK)
     {
       printf("Erro ao tentar abrir flash \n");
@@ -101,8 +104,10 @@ void taskReadNum1(void *pvParameter)
     if (received_num_1 < -200 || received_num_1 > 1000)
     {
       gpio_set_level(LED1_PIN, 0);
+      vTaskDelay(pdMS_TO_TICKS(1000));
 
       err = nvs_set_i32(nvs_handle_1, "th_read_num_1", received_num_1);
+
       if (err != ESP_OK)
       {
         printf("Erro ao gravar \n");
@@ -110,6 +115,7 @@ void taskReadNum1(void *pvParameter)
       }
 
       err = nvs_commit(nvs_handle_1);
+
       if (err != ESP_OK)
       {
         printf("Erro ao dar commit \n");
@@ -117,10 +123,10 @@ void taskReadNum1(void *pvParameter)
       }
 
       gpio_set_level(LED1_PIN, 1);
+      vTaskDelay(pdMS_TO_TICKS(1000));
     }
-    gpio_set_level(LED1_PIN, 1);
-
     nvs_close(nvs_handle_1);
+    gpio_set_level(LED1_PIN, 1);
     vTaskDelay(pdMS_TO_TICKS(1000));
   }
 }
@@ -136,6 +142,7 @@ void taskReadNum2(void *pvParameter)
     xQueueReceive(queue_2, &received_num_2, portMAX_DELAY);
 
     err = nvs_open("storage", NVS_READWRITE, &nvs_handle_2);
+
     if (err != ESP_OK)
     {
       printf("Erro ao tentar abrir flash \n");
@@ -145,8 +152,10 @@ void taskReadNum2(void *pvParameter)
     if (received_num_2 < -200 || received_num_2 > 1000)
     {
       gpio_set_level(LED2_PIN, 0);
+      vTaskDelay(pdMS_TO_TICKS(1000));
 
       err = nvs_set_i32(nvs_handle_2, "th_read_num_2", received_num_2);
+
       if (err != ESP_OK)
       {
         printf("Erro ao gravar \n");
@@ -154,6 +163,7 @@ void taskReadNum2(void *pvParameter)
       }
 
       err = nvs_commit(nvs_handle_2);
+
       if (err != ESP_OK)
       {
         printf("Erro ao dar commit \n");
@@ -161,10 +171,10 @@ void taskReadNum2(void *pvParameter)
       }
 
       gpio_set_level(LED2_PIN, 1);
+      vTaskDelay(pdMS_TO_TICKS(1000));
     }
-    gpio_set_level(LED2_PIN, 1);
-
     nvs_close(nvs_handle_2);
+    gpio_set_level(LED2_PIN, 1);
     vTaskDelay(pdMS_TO_TICKS(1000));
   }
 }
