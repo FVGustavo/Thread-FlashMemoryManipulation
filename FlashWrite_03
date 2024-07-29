@@ -146,7 +146,7 @@ void taskReadNum2(void *pvParameter)
     {
       gpio_set_level(LED2_PIN, 0);
 
-      err = nvs_set_i32(nvs_handle_2, "th_read_num_1", received_num_2);
+      err = nvs_set_i32(nvs_handle_2, "th_read_num_2", received_num_2);
       if (err != ESP_OK)
       {
         printf("Erro ao gravar \n");
