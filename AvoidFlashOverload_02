@@ -20,10 +20,15 @@
 
 #define QUEUE_SIZE 16
 
+#define MIN_1 -5
+#define MIN_2 -7
+#define MAX_1 -5
+#define MAX_2 -7
+
 BaseType_t th_gen_num_1, th_gen_num_2, th_read_num_1, th_read_num_2, th_read_nvs;
 TaskHandle_t th_handle_1, th_handle_2, th_handle_3, th_handle_4;
 QueueHandle_t queue_handle_1, queue_handle_2;
-SemaphoreHandle_t semaphore_handle_1;
+SemaphoreHandle_t mutex;
 
 void taskReadNVS(void);
 
@@ -38,6 +43,7 @@ void taskGenNum1(void)
   while (1)
   {
     ran_num_1 = genRanNum(-10, 10);
+
     xQueueSend(queue_handle_1, &ran_num_1, portMAX_DELAY);
     vTaskDelay(pdMS_TO_TICKS(1000));
   }
@@ -49,6 +55,7 @@ void taskGenNum2(void)
   while (1)
   {
     ran_num_2 = genRanNum(-10, 10);
+
     xQueueSend(queue_handle_2, &ran_num_2, portMAX_DELAY);
     vTaskDelay(pdMS_TO_TICKS(1000));
   }
@@ -71,9 +78,9 @@ void taskReadNum1(void *pvParameter)
       printf("Erro ao tentar abrir flash \n");
       return;
     }
-    if (xSemaphoreTake(semaphore_handle_1, pdMS_TO_TICKS(100)) == pdTRUE)
+    if (xSemaphoreTake(mutex, pdMS_TO_TICKS(100)) == pdTRUE)
     {
-      if (received_num_1 < -200 || received_num_1 > 1000)
+      if (received_num_1 < MIN_1 || received_num_1 > MAX_1)
       {
         gpio_set_level(LED1_PIN, 0);
         vTaskDelay(pdMS_TO_TICKS(1000));
@@ -94,11 +101,11 @@ void taskReadNum1(void *pvParameter)
 
         gpio_set_level(LED1_PIN, 1);
       }
-      xSemaphoreGive(semaphore_handle_1);
+      xSemaphoreGive(mutex);
     }
     else
     {
-      printf("Erro ao pegar semáforo \n");
+      printf("Erro ao pegar mutex \n");
     }
     nvs_close(nvs_handle_1);
   }
@@ -122,9 +129,9 @@ void taskReadNum2(void *pvParameter)
       return;
     }
 
-    if (xSemaphoreTake(semaphore_handle_1, pdMS_TO_TICKS(100)) == pdTRUE)
+    if (xSemaphoreTake(mutex, pdMS_TO_TICKS(100)) == pdTRUE)
     {
-      if (received_num_2 < -400 || received_num_2 > 700)
+      if (received_num_2 < MIN_2 || received_num_2 > MAX_2)
       {
         gpio_set_level(LED2_PIN, 0);
         vTaskDelay(pdMS_TO_TICKS(1000));
@@ -145,11 +152,11 @@ void taskReadNum2(void *pvParameter)
 
         gpio_set_level(LED2_PIN, 1);
       }
-      xSemaphoreGive(semaphore_handle_1);
+      xSemaphoreGive(mutex);
     }
     else
     {
-      printf("Erro ao pegar semáforo \n");
+      printf("Erro ao pegar mutex \n");
     }
     nvs_close(nvs_handle_2);
   }
@@ -220,11 +227,11 @@ void app_main(void)
   btn_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
   gpio_config(&btn_conf);
 
-  semaphore_handle_1 = xSemaphoreCreateCounting(16, 0);
+  mutex = xSemaphoreCreateMutex();
 
-  if (semaphore_handle_1 == NULL)
+  if (mutex == NULL)
   {
-    printf("Erro ao criar semáforo 1 \n");
+    printf("Erro ao criar mutex \n");
     return;
   }
 
