@@ -181,7 +181,7 @@ void app_main(void)
   led_conf.pull_down_en = GPIO_PULLDOWN_ENABLE;                    // Habilita pull down
   gpio_config(&led_conf);
 
-  queue_2 = xQueueCreate(QUEUE_SIZE, sizeof(int16_t));
+  queue_1 = xQueueCreate(QUEUE_SIZE, sizeof(int16_t));
   queue_2 = xQueueCreate(QUEUE_SIZE, sizeof(int16_t));
 
   if (queue_1 == NULL)
