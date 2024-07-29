@@ -89,6 +89,8 @@ void taskReadNum1(void *pvParameter)
 
   while (1)
   {
+    xQueueReceive(queue_1, &received_num_1, portMAX_DELAY);
+
     err = nvs_open("storage", NVS_READWRITE, &nvs_handle_1);
     if (err != ESP_OK)
     {
@@ -96,31 +98,30 @@ void taskReadNum1(void *pvParameter)
       return;
     }
 
-    xQueueReceive(queue_1, &received_num_1, portMAX_DELAY);
     if (received_num_1 < -200 || received_num_1 > 1000)
     {
       gpio_set_level(LED1_PIN, 0);
-      vTaskDelay(pdMS_TO_TICKS(1000));
 
       err = nvs_set_i32(nvs_handle_1, "th_read_num_1", received_num_1);
       if (err != ESP_OK)
       {
         printf("Erro ao gravar \n");
+        nvs_close(nvs_handle_1);
       }
 
       err = nvs_commit(nvs_handle_1);
       if (err != ESP_OK)
       {
         printf("Erro ao dar commit \n");
+        nvs_close(nvs_handle_1);
       }
 
       gpio_set_level(LED1_PIN, 1);
-      vTaskDelay(pdMS_TO_TICKS(1000));
     }
     gpio_set_level(LED1_PIN, 1);
-    vTaskDelay(pdMS_TO_TICKS(1000));
 
     nvs_close(nvs_handle_1);
+    vTaskDelay(pdMS_TO_TICKS(1000));
   }
 }
 
@@ -132,6 +133,8 @@ void taskReadNum2(void *pvParameter)
 
   while (1)
   {
+    xQueueReceive(queue_2, &received_num_2, portMAX_DELAY);
+
     err = nvs_open("storage", NVS_READWRITE, &nvs_handle_2);
     if (err != ESP_OK)
     {
@@ -139,31 +142,30 @@ void taskReadNum2(void *pvParameter)
       return;
     }
 
-    xQueueReceive(queue_2, &received_num_2, portMAX_DELAY);
     if (received_num_2 < -200 || received_num_2 > 1000)
     {
       gpio_set_level(LED2_PIN, 0);
-      vTaskDelay(pdMS_TO_TICKS(1000));
 
-      err = nvs_set_i32(nvs_handle_2, "th_read_num_2", received_num_2);
+      err = nvs_set_i32(nvs_handle_2, "th_read_num_1", received_num_2);
       if (err != ESP_OK)
       {
         printf("Erro ao gravar \n");
+        nvs_close(nvs_handle_2);
       }
 
       err = nvs_commit(nvs_handle_2);
       if (err != ESP_OK)
       {
         printf("Erro ao dar commit \n");
+        nvs_close(nvs_handle_2);
       }
 
       gpio_set_level(LED2_PIN, 1);
-      vTaskDelay(pdMS_TO_TICKS(1000));
     }
     gpio_set_level(LED2_PIN, 1);
-    vTaskDelay(pdMS_TO_TICKS(1000));
 
     nvs_close(nvs_handle_2);
+    vTaskDelay(pdMS_TO_TICKS(1000));
   }
 }
 
@@ -179,7 +181,7 @@ void app_main(void)
   led_conf.pull_down_en = GPIO_PULLDOWN_ENABLE;                    // Habilita pull down
   gpio_config(&led_conf);
 
-  queue_1 = xQueueCreate(QUEUE_SIZE, sizeof(int16_t));
+  queue_2 = xQueueCreate(QUEUE_SIZE, sizeof(int16_t));
   queue_2 = xQueueCreate(QUEUE_SIZE, sizeof(int16_t));
 
   if (queue_1 == NULL)
