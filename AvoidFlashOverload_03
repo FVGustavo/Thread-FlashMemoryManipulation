@@ -1,11 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <esp_mac.h>
+
 #include "rand_num.h"
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
 #include "freertos/semphr.h"
+
 #include "driver/gpio.h"
 #include "esp_err.h"
 #include "nvs_flash.h"
@@ -13,7 +16,9 @@
 #define LED1_PIN GPIO_NUM_32
 #define LED2_PIN GPIO_NUM_33
 #define BTN1_PIN GPIO_NUM_14
+
 #define QUEUE_SIZE 16
+
 #define MIN_1 -5
 #define MIN_2 -7
 #define MAX_1 5
@@ -61,7 +66,7 @@ void taskReadNum1(void *pvParameter)
   err = nvs_open("storage", NVS_READWRITE, &nvs_handle_1);
   if (err != ESP_OK)
   {
-    printf("Error opening NVS: %s\n", esp_err_to_name(err));
+    printf("Erro ao abrir flash \n");
     vTaskDelete(NULL);
   }
 
@@ -79,13 +84,13 @@ void taskReadNum1(void *pvParameter)
         err = nvs_set_i32(nvs_handle_1, "th_read_num_1", received_num_1);
         if (err != ESP_OK)
         {
-          printf("Error writing to NVS: %s\n", esp_err_to_name(err));
+          printf("Erro ao gravar na flash \n");
         }
 
         err = nvs_commit(nvs_handle_1);
         if (err != ESP_OK)
         {
-          printf("Error committing to NVS: %s\n", esp_err_to_name(err));
+          printf("Erro ao commitar na flash \n");
         }
 
         gpio_set_level(LED1_PIN, 1);
@@ -94,7 +99,7 @@ void taskReadNum1(void *pvParameter)
     }
     else
     {
-      printf("Error taking mutex\n");
+      printf("Erro ao pegar mutex \n");
     }
   }
 
@@ -110,7 +115,7 @@ void taskReadNum2(void *pvParameter)
   err = nvs_open("storage", NVS_READWRITE, &nvs_handle_2);
   if (err != ESP_OK)
   {
-    printf("Error opening NVS: %s\n", esp_err_to_name(err));
+    printf("Erro ao abrir flash \n");
     vTaskDelete(NULL);
   }
 
@@ -128,13 +133,13 @@ void taskReadNum2(void *pvParameter)
         err = nvs_set_i32(nvs_handle_2, "th_read_num_2", received_num_2);
         if (err != ESP_OK)
         {
-          printf("Error writing to NVS: %s\n", esp_err_to_name(err));
+          printf("Erro ao gravar na flash \n");
         }
 
         err = nvs_commit(nvs_handle_2);
         if (err != ESP_OK)
         {
-          printf("Error committing to NVS: %s\n", esp_err_to_name(err));
+          printf("Erro ao commitar na flash \n");
         }
 
         gpio_set_level(LED2_PIN, 1);
@@ -143,7 +148,7 @@ void taskReadNum2(void *pvParameter)
     }
     else
     {
-      printf("Error taking mutex\n");
+      printf("Erro ao pegar mutex \n");
     }
   }
 
@@ -160,36 +165,36 @@ void taskReadNVS(void)
   err = nvs_open("storage", NVS_READWRITE, &handle);
   if (err != ESP_OK)
   {
-    printf("Error opening NVS: %s\n", esp_err_to_name(err));
+    printf("Erro ao abrir flash \n");
     return;
   }
 
   err = nvs_get_i32(handle, "th_read_num_1", &stored_value_1);
   if (err == ESP_ERR_NVS_NOT_FOUND)
   {
-    printf("Value th_read_num_1 not initialized\n");
+    printf("Valor da task 1 não inicializado \n");
   }
   else if (err == ESP_OK)
   {
-    printf("Value read by task 1: %ld\n", stored_value_1);
+    printf("Valor lido da task 1: %ld\n", stored_value_1);
   }
   else
   {
-    printf("Error reading th_read_num_1: %s\n", esp_err_to_name(err));
+    printf("Erro na leitura da task 1: %s\n", esp_err_to_name(err));
   }
 
   err = nvs_get_i32(handle, "th_read_num_2", &stored_value_2);
   if (err == ESP_ERR_NVS_NOT_FOUND)
   {
-    printf("Value th_read_num_2 not initialized\n");
+    printf("Valor da task 2 não inicializado \n");
   }
   else if (err == ESP_OK)
   {
-    printf("Value read by task 2: %ld\n", stored_value_2);
+    printf("Valor lido da task 2: %ld\n", stored_value_2);
   }
   else
   {
-    printf("Error reading th_read_num_2: %s\n", esp_err_to_name(err));
+    printf("Erro na leitura da task 2: %s\n", esp_err_to_name(err));
   }
 
   nvs_close(handle);
@@ -200,7 +205,7 @@ void app_main(void)
   esp_err_t ret = nvs_flash_init();
   if (ret != ESP_OK)
   {
-    printf("NVS Flash init error: %s\n", esp_err_to_name(ret));
+    printf("Erro ao inicializar flash \n");
     return;
   }
 
@@ -223,49 +228,49 @@ void app_main(void)
   mutex = xSemaphoreCreateMutex();
   if (mutex == NULL)
   {
-    printf("Error creating mutex\n");
+    printf("Erro ao criar mutex \n");
     return;
   }
 
   queue_handle_1 = xQueueCreate(QUEUE_SIZE, sizeof(int16_t));
   if (queue_handle_1 == NULL)
   {
-    printf("Error creating queue 1\n");
+    printf("Erro ao criar fila 1 \n");
     return;
   }
 
   queue_handle_2 = xQueueCreate(QUEUE_SIZE, sizeof(int16_t));
   if (queue_handle_2 == NULL)
   {
-    printf("Error creating queue 2\n");
+    printf("Erro ao criar fila 2 \n");
     return;
   }
 
   th_gen_num_1 = xTaskCreate(taskGenNum1, "thread_1", 2 * 1024, NULL, 5, &th_handle_1);
   if (th_gen_num_1 != pdPASS)
   {
-    printf("Error creating thread 1\n");
+    printf("Erro ao criar task 1 \n");
     return;
   }
 
   th_gen_num_2 = xTaskCreate(taskGenNum2, "thread_2", 2 * 1024, NULL, 5, &th_handle_2);
   if (th_gen_num_2 != pdPASS)
   {
-    printf("Error creating thread 2\n");
+    printf("Erro ao criar task 2 \n");
     return;
   }
 
   th_read_num_1 = xTaskCreate(taskReadNum1, "thread_3", 2 * 1024, NULL, 5, &th_handle_3);
   if (th_read_num_1 != pdPASS)
   {
-    printf("Error creating thread 3\n");
+    printf("Erro ao criar task 3 \n");
     return;
   }
 
   th_read_num_2 = xTaskCreate(taskReadNum2, "thread_4", 2 * 1024, NULL, 5, &th_handle_4);
   if (th_read_num_2 != pdPASS)
   {
-    printf("Error creating thread 4\n");
+    printf("Erro ao criar task 4 \n");
     return;
   }
 
