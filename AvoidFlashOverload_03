@@ -64,19 +64,20 @@ void taskReadNum1(void *pvParameter)
   esp_err_t err;
   nvs_handle_t nvs_handle_1;
 
-  err = nvs_open("storage", NVS_READWRITE, &nvs_handle_1);
-  if (err != ESP_OK)
-  {
-    printf("Erro ao abrir flash \n");
-    vTaskDelete(NULL);
-  }
-
   while (1)
   {
     xQueueReceive(queue_handle_1, &received_num_1, portMAX_DELAY);
 
     if (xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE)
     {
+      err = nvs_open("storage", NVS_READWRITE, &nvs_handle_1);
+      if (err != ESP_OK)
+      {
+        printf("Erro ao abrir flash \n");
+        vTaskDelete(NULL);
+        return;
+      }
+
       if (received_num_1 < MIN_1 || received_num_1 > MAX_1)
       {
         gpio_set_level(LED1_PIN, 0);
@@ -86,12 +87,14 @@ void taskReadNum1(void *pvParameter)
         if (err != ESP_OK)
         {
           printf("Erro ao gravar na flash \n");
+          return;
         }
 
         err = nvs_commit(nvs_handle_1);
         if (err != ESP_OK)
         {
           printf("Erro ao commitar na flash \n");
+          return;
         }
 
         gpio_set_level(LED1_PIN, 1);
@@ -113,19 +116,19 @@ void taskReadNum2(void *pvParameter)
   esp_err_t err;
   nvs_handle_t nvs_handle_2;
 
-  err = nvs_open("storage", NVS_READWRITE, &nvs_handle_2);
-  if (err != ESP_OK)
-  {
-    printf("Erro ao abrir flash \n");
-    vTaskDelete(NULL);
-  }
-
   while (1)
   {
     xQueueReceive(queue_handle_2, &received_num_2, portMAX_DELAY);
 
     if (xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE)
     {
+      err = nvs_open("storage", NVS_READWRITE, &nvs_handle_2);
+      if (err != ESP_OK)
+      {
+        printf("Erro ao abrir flash \n");
+        vTaskDelete(NULL);
+        return;
+      }
       if (received_num_2 < MIN_2 || received_num_2 > MAX_2)
       {
         gpio_set_level(LED2_PIN, 0);
@@ -135,12 +138,14 @@ void taskReadNum2(void *pvParameter)
         if (err != ESP_OK)
         {
           printf("Erro ao gravar na flash \n");
+          return;
         }
 
         err = nvs_commit(nvs_handle_2);
         if (err != ESP_OK)
         {
           printf("Erro ao commitar na flash \n");
+          return;
         }
 
         gpio_set_level(LED2_PIN, 1);
