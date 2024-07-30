@@ -30,6 +30,7 @@ QueueHandle_t queue_handle_1, queue_handle_2;
 SemaphoreHandle_t mutex;
 
 void taskReadNVS(void);
+
 void taskGenNum1(void);
 void taskGenNum2(void);
 void taskReadNum1(void *pvParameter);
@@ -81,7 +82,7 @@ void taskReadNum1(void *pvParameter)
         gpio_set_level(LED1_PIN, 0);
         vTaskDelay(pdMS_TO_TICKS(1000));
 
-        err = nvs_set_i32(nvs_handle_1, "th_read_num_1", received_num_1);
+        err = nvs_set_i16(nvs_handle_1, "th_read_num_1", received_num_1);
         if (err != ESP_OK)
         {
           printf("Erro ao gravar na flash \n");
@@ -130,7 +131,7 @@ void taskReadNum2(void *pvParameter)
         gpio_set_level(LED2_PIN, 0);
         vTaskDelay(pdMS_TO_TICKS(1000));
 
-        err = nvs_set_i32(nvs_handle_2, "th_read_num_2", received_num_2);
+        err = nvs_set_i16(nvs_handle_2, "th_read_num_2", received_num_2);
         if (err != ESP_OK)
         {
           printf("Erro ao gravar na flash \n");
@@ -159,8 +160,8 @@ void taskReadNVS(void)
 {
   esp_err_t err;
   nvs_handle_t handle;
-  int32_t stored_value_1 = 0;
-  int32_t stored_value_2 = 0;
+  int16_t stored_value_1 = 0;
+  int16_t stored_value_2 = 0;
 
   err = nvs_open("storage", NVS_READWRITE, &handle);
   if (err != ESP_OK)
@@ -169,7 +170,7 @@ void taskReadNVS(void)
     return;
   }
 
-  err = nvs_get_i32(handle, "th_read_num_1", &stored_value_1);
+  err = nvs_get_i16(handle, "th_read_num_1", &stored_value_1);
   if (err == ESP_ERR_NVS_NOT_FOUND)
   {
     printf("Valor da task 1 não inicializado \n");
@@ -183,7 +184,7 @@ void taskReadNVS(void)
     printf("Erro na leitura da task 1: %s\n", esp_err_to_name(err));
   }
 
-  err = nvs_get_i32(handle, "th_read_num_2", &stored_value_2);
+  err = nvs_get_i16(handle, "th_read_num_2", &stored_value_2);
   if (err == ESP_ERR_NVS_NOT_FOUND)
   {
     printf("Valor da task 2 não inicializado \n");
