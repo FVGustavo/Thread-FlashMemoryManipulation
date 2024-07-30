@@ -182,11 +182,11 @@ void taskReadNVS(void)
   }
   else if (err == ESP_OK)
   {
-    printf("Valor lido da task 1: %ld\n", stored_value_1);
+    printf("Valor lido da task 1: %hd\n", stored_value_1);
   }
   else
   {
-    printf("Erro na leitura da task 1: %s\n", esp_err_to_name(err));
+    printf("Erro na leitura da task 1\n");
   }
 
   err = nvs_get_i16(handle, "th_read_num_2", &stored_value_2);
@@ -196,11 +196,11 @@ void taskReadNVS(void)
   }
   else if (err == ESP_OK)
   {
-    printf("Valor lido da task 2: %ld\n", stored_value_2);
+    printf("Valor lido da task 2: %hd\n", stored_value_2);
   }
   else
   {
-    printf("Erro na leitura da task 2: %s\n", esp_err_to_name(err));
+    printf("Erro na leitura da task 2 \n");
   }
 
   nvs_close(handle);
